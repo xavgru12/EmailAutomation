@@ -8,8 +8,13 @@ import smtplib, ssl
 
 def main():
     data=createDummyData()
-    readData(data)
-    sendEmail()
+    #exampleReadDataFromStructure(data)
+    writeDataToFile(data)
+    dataFromFile=loadDataFromFile()
+    contacts=extractContactsFromData(dataFromFile)
+    iterateOverContactsToSendEmail(contacts)
+    #contacts=readDataFromFile(data)
+    #sendEmail(contacts)
 
 def createDummyData():
 
@@ -62,7 +67,7 @@ def createDummyData():
 # completeCompanies = ["Companies: ", company_list]
 
 
-def readData(company_list):
+def readDataFromFile(company_list):
     
     dirnameToCreate= "Model"
     if not os.path.exists(dirnameToCreate):
@@ -75,7 +80,7 @@ def readData(company_list):
         dataFromYaml = yaml.load(file, Loader=yaml.FullLoader)
 
     companyWithContacts= dataFromYaml
-
+    return companyWithContacts
 
 
 
@@ -98,12 +103,44 @@ def readData(company_list):
 
 
 
-    def sendEmail(company, contact_dict):
-        email_address= contact_dict['email']
-        print("email: "+ email_address)
-        sex= contact_dict['sex']
-        name=contact_dict['contactname']
+def contactInfoOutput(company, contact_dict):
+    email_address= contact_dict['email'] #important info for now is just
+    print("email: "+ email_address)
+    sex= contact_dict['sex']
+    name=contact_dict['contactname']
 
+def writeDataToFile(company_list):
+    dirnameToCreate= "Model"
+    if not os.path.exists(dirnameToCreate):
+        os.makedirs(dirnameToCreate)
+    with open("Model/Output.yaml", mode="wt", encoding="utf-8") as file:
+        yaml.dump(company_list, file)
+
+
+def loadDataFromFile():
+    with open("Model/Output.yaml", mode="r") as file:
+        dataFromYaml = yaml.load(file, Loader=yaml.FullLoader)
+
+    companyWithContacts= dataFromYaml
+    return companyWithContacts
+
+def extractContactsFromData(companyWithContacts):
+    contact_list=[]
+    for contactsByCompany in companyWithContacts:
+        print("company name: ")
+        companyName= contactsByCompany['CompanyName']
+        print(companyName)
+        
+        contacts= contactsByCompany['contactInfo']
+        contact_list.extend(contacts)
+    
+    return contact_list
+
+def iterateOverContactsToSendEmail(contacts):
+    for contact in contacts:
+        sendEmail(contact)
+
+def exampleReadDataFromStructure(companyWithContacts):
     for contactsByCompany in companyWithContacts:
         print("company name: ")
         companyName= contactsByCompany['CompanyName']
@@ -113,7 +150,7 @@ def readData(company_list):
         contacts= contactsByCompany['contactInfo']
         print(contacts)
         for contact in contacts:
-            sendEmail(companyName, contact)
+            contactInfoOutput(companyName, contact)
         print("complete company info: ")
         print(contactsByCompany)
         print()
@@ -124,8 +161,9 @@ def readData(company_list):
     #print("data from yaml:")
     #print(dataFromYaml)
 
-def sendEmail():
-    pass
+def sendEmail(contact_dict):
+    email_address= contact_dict['email']
+    print("email will be sent to: "+email_address)
 
 if __name__ == '__main__':
     main()
