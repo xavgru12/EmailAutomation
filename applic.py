@@ -1,10 +1,9 @@
-from venv import create
 import yaml
-import os #create dir in sendEmail
-import smtplib, ssl
-#['zhuelke', 'Comet']
-#company= [CompanyInfo, CompanyInfo]
+import os #create dir in sendEmail, already imported by emailClient
+from emailClient import SendMessage
+#import emailClient
 
+sender="xaver.max.gruber@googlemail.com"
 
 def main():
     data=createDummyData()
@@ -82,27 +81,6 @@ def readDataFromFile(company_list):
     companyWithContacts= dataFromYaml
     return companyWithContacts
 
-
-
-    # port = 465  # For SSL
-    # smtp_server = "smtp.gmail.com"
-    # sender_email = "xaver.max.gruber@googlemail.com"  # Enter your address
-    # receiver_email = "xaver.max.gruber+TestEmail@gmail.com"  # Enter receiver address
-    # password = input("Type your password and press enter: ")
-    # message = """\
-    # Subject: Hi there
-
-    # This message is sent from Python."""
-
-    # context = ssl.create_default_context()
-    # with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
-    #     server.login(sender_email, password)
-    #     server.sendmail(sender_email, receiver_email, message)
-
-
-
-
-
 def contactInfoOutput(company, contact_dict):
     email_address= contact_dict['email'] #important info for now is just
     print("email: "+ email_address)
@@ -138,7 +116,7 @@ def extractContactsFromData(companyWithContacts):
 
 def iterateOverContactsToSendEmail(contacts):
     for contact in contacts:
-        sendEmail(contact)
+        takeDataToSendEmail(contact, "CatchUp")
 
 def exampleReadDataFromStructure(companyWithContacts):
     for contactsByCompany in companyWithContacts:
@@ -161,9 +139,53 @@ def exampleReadDataFromStructure(companyWithContacts):
     #print("data from yaml:")
     #print(dataFromYaml)
 
-def sendEmail(contact_dict):
+def sendMaleEmail(base_path,email):
+
+        
+        with open(base_path+"/TextMale.txt","r") as file:
+            text=file.read()
+                
+        with open(base_path+"/SubjectMale.txt","r") as file:
+            subject=file.read()
+
+        if text is not None and subject is not None:
+            SendMessage(sender, email, subject, "", text)
+            
+
+def sendFemaleEmail(base_path, email):
+        with open(base_path+"/TextFemale.txt","r") as file:
+            text=file.read()
+
+        with open(base_path+"/SubjectFemale.txt","r") as file:
+            subject=file.read()
+
+        if text is not None and subject is not None:
+            SendMessage(sender, email, subject, "", text)
+            #SendMessage(sender, to, subject, msgHtml, msgPlain)
+    
+
+
+def takeDataToSendEmail(contact_dict, folder_name):
+    base_path="./Model/"+folder_name
+    if not os.path.exists(base_path):
+        raise("Folder could not be found")
+
     email_address= contact_dict['email']
+    name= contact_dict['contactname']
+    sex=contact_dict['sex']
     print("email will be sent to: "+email_address)
+    if email_address is not None and name is not None:
+        if sex is "f":
+            sendFemaleEmail(base_path, email_address)
+        elif sex is "m":
+            sendMaleEmail(base_path, email_address)
+        else:
+            raise("unknown sex type")
+    else:
+        raise("missing data")
+        
+    
+    #SendMessage(sender, to, subject, msgHtml, msgPlain)
 
 if __name__ == '__main__':
     main()
