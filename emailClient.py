@@ -53,7 +53,7 @@ def SendMessageInternal(service, user_id, message):
     return "OK"
 
 def CreateMessageHtml(sender, to, subject, msgHtml, msgPlain):
-    msg = MIMEMultipart('alternative')
+    msg = MIMEMultipart('mixed')
     msg['Subject'] = subject
     msg['From'] = sender
     msg['To'] = to
