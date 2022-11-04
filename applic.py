@@ -1,7 +1,6 @@
 import yaml
-import os #create dir in sendEmail, already imported by emailClient
+import os #create dir in sendEmail
 from emailClient import SendMessage
-#import emailClient
 
 sender="xaver.max.gruber@googlemail.com"
 
@@ -9,61 +8,76 @@ def main():
     data=createDummyData()
     #exampleReadDataFromStructure(data)
     writeDataToFile(data)
-    dataFromFile=loadDataFromFile()
-    contacts=extractContactsFromData(dataFromFile)
-    iterateOverContactsToSendEmail(contacts)
-    #contacts=readDataFromFile(data)
-    #sendEmail(contacts)
+    pass
+
+# """
+#     dataFromFile=loadDataFromFile()
+#     contacts=extractContactsFromData(dataFromFile)
+#     iterateOverContactsToSendEmail(contacts)
+#     #contacts=readDataFromFile(data)
+#     #sendEmail(contacts)"""
 
 def createDummyData():
 
-    contactInfo = {
-        'contactname': 'TestKontaktMaennlich1',
+    contactDetails = {
+        'contactFullName': 'TestKontaktMaennlich1',
+        'contactNickName' : "Herr NachnameMaennlich",
         'email': 'xaver.max.gruber+test1@gmail.com',
-        'sex': 'm'
+        'sex': 'm',
+        'function' : 'HR',
+        'language' : 'English',
+        'formality' : True 
 
     }
 
-    contactInfo3 = {
-        'contactname': 'TestKontaktWeiblich3',
+    contactDetails3 = {
+        'contactFullName': 'TestKontaktWeiblich3',
+        'contactNickName' : "Vorname NachnameWeiblich",
         'email': 'xaver.max.gruber+test3@gmail.com',
-        'sex': 'f'
+        'sex': 'f',
+        'function' : 'HR',
+        'language' : 'German',
+        'formality' : False 
+
 
     }
 
-    contactInfo4 = {
-        'contactname': 'TestKontaktWeiblich4',
+    contactDetails4 = {
+        'contactFullName': 'TestKontaktWeiblich4',
+        'contactNickName' : "Frau NachnameWeiblich",
         'email': 'xaver.max.gruber+test4@gmail.com',
-        'sex': 'f'
+        'sex': 'f',
+        'function' : 'Technical',
+        'language' : 'German',
+        'formality' : True 
 
     }
 
-    contactInfo2 = {
-        'contactname': 'TestKontaktMaennlich2',
+    contactDetails2 = {
+        'contactFullName': 'TestKontaktMaennlich2',
+        'contactNickName' : "Vorname NachnameMaennlich",
         'email': 'xaver.max.gruber+test2@gmail.com',
-        'sex': 'm'
+        'sex': 'm',
+        'function' : 'TeamLead',
+        'language' : 'English',
+        'formality' : False
 
     }
+    #lastEdited would be useful when data is in a a database, for now it is a local file
     company_name1="zhuelke"
-    company= [contactInfo, contactInfo2]
-    #print(company)
-    contacts = [contactInfo, contactInfo2]
-    contacts2 = [contactInfo3, contactInfo4]
-    companies = {
+    contactList = [contactDetails, contactDetails2]
+    contactList2 = [contactDetails3, contactDetails4]
+    companyData = {
         'CompanyName': company_name1,
-        'contactInfo': contacts
+        'Contacts': contactList
     }
-    companies2 ={
+    companyData2 ={
         'CompanyName': company_name1,
-        'contactInfo': contacts2
+        'Contacts': contactList2
 
     }
-    company_list = [companies, companies2]
+    company_list = [companyData, companyData2]
     return company_list
-
-
-# company_list = [companies, companies2]
-# completeCompanies = ["Companies: ", company_list]
 
 
 def readDataFromFile(company_list):
@@ -82,7 +96,7 @@ def readDataFromFile(company_list):
     return companyWithContacts
 
 def contactInfoOutput(company, contact_dict):
-    email_address= contact_dict['email'] #important info for now is just
+    email_address= contact_dict['email'] 
     print("email: "+ email_address)
     sex= contact_dict['sex']
     name=contact_dict['contactname']
@@ -102,6 +116,10 @@ def loadDataFromFile():
     companyWithContacts= dataFromYaml
     return companyWithContacts
 
+def createInternalStructureFromFileData():
+    pass
+
+
 def extractContactsFromData(companyWithContacts):
     contact_list=[]
     for contactsByCompany in companyWithContacts:
@@ -109,7 +127,7 @@ def extractContactsFromData(companyWithContacts):
         companyName= contactsByCompany['CompanyName']
         print(companyName)
         
-        contacts= contactsByCompany['contactInfo']
+        contacts= contactsByCompany['Contacts']
         contact_list.extend(contacts)
     
     return contact_list
@@ -134,10 +152,6 @@ def exampleReadDataFromStructure(companyWithContacts):
         print()
         print()
         print()
-
-
-    #print("data from yaml:")
-    #print(dataFromYaml)
 
 def sendMaleEmail(base_path,email):
 
@@ -183,9 +197,6 @@ def takeDataToSendEmail(contact_dict, folder_name):
             raise("unknown sex type")
     else:
         raise("missing data")
-        
-    
-    #SendMessage(sender, to, subject, msgHtml, msgPlain)
 
 if __name__ == '__main__':
     main()
