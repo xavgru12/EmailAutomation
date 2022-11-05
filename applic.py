@@ -1,6 +1,7 @@
 import yaml
 import os #create dir in sendEmail
 from emailClient import SendMessage
+from CompanyData import ContactDetails, CompanyData
 
 sender="xaver.max.gruber@googlemail.com"
 pathToDataFile=r"Model/Output.yaml"
@@ -12,11 +13,10 @@ def main():
     writeDataToFile(data)
 
 
-    dataFromFile=loadDataFromFile(pathToDataFile)
-    createInternalStructureFromFileData(dataFromFile)
+    dataFromFile=loadDataFromFile(pathToDataFile) #write function to verify data file by checking if all fields eg contacts, email, company name exist
+    all_companies_data_dictionary=createInternalStructureFromFileData(dataFromFile)
+    print(all_companies_data_dictionary)
 
-    #highest instance should be a dictionary, with key of company name and value is an object with complete company data
-    
 
 # """
 #     dataFromFile=loadDataFromFile()
@@ -73,6 +73,7 @@ def createDummyData():
     }
     #lastEdited would be useful when data is in a a database, for now it is a local file
     company_name1="zhuelke"
+    company_name2="Swisson"
     contactList = [contactDetails, contactDetails2]
     contactList2 = [contactDetails3, contactDetails4]
     companyData = {
@@ -80,7 +81,7 @@ def createDummyData():
         'Contacts': contactList
     }
     companyData2 ={
-        'CompanyName': company_name1,
+        'CompanyName': company_name2,
         'Contacts': contactList2
 
     }
@@ -135,8 +136,69 @@ def loadDataFromFile(file_path):
     companyWithContacts= dataFromYaml
     return companyWithContacts"""
 
-def createInternalStructureFromFileData(data):
-    pass
+def createInternalStructureFromFileData(company_list):
+
+    company_dictionary={}
+    for company in company_list:
+        company_data_as_object, company_name= collectData(company)
+        #print(company_data_as_object)
+        
+        if company_name not in company_dictionary:
+            company_dictionary[company_name]= company_data_as_object
+        else:
+            print(company_name+" found twice.")
+            raise Exception("Same company was found twice in data file. Remove the double from file.")
+    
+    return company_dictionary
+
+def collectData(company):
+    
+    #get company name
+    company_name=str(company['CompanyName']).casefold()
+    if company_name == "":
+        raise Exception("no company name was found in data file. Check file")
+    
+    #get contacts data
+    contact_list=company['Contacts']
+
+    #structure for ContactDetails objects
+    contact_dictionary=dict(hr=[], team_lead=[], technical=[])
+
+    #create ContactDetails objects and structure them via function dictionary
+    for contact in contact_list:
+        full_name=contact['contactFullName']
+        nick_name=contact['contactNickName']
+        email=contact['email']
+        sex=getContactSex(contact['sex'])
+        function=getContactFunction(contact['function'])
+        language=contact['language']
+        formality=contact['formality']
+
+        contact_object=ContactDetails(full_name, nick_name, email, sex, function, language, formality)
+
+        contact_dictionary[function].append(contact_object)
+
+    #create CompanyData object
+    company_data_object=CompanyData(company_name, contact_dictionary)
+
+    return company_data_object, company_name
+
+def getContactFunction(functionFromDataFile):
+
+    if functionFromDataFile == 'HR':
+        return 'hr'
+    elif functionFromDataFile == 'TeamLead':
+        return 'team_lead'
+    elif functionFromDataFile == 'Technical':
+        return 'technical'
+
+def getContactSex(sexFromDataFile):
+
+    if sexFromDataFile == 'm':
+        return 'm'
+    elif sexFromDataFile == 'f':
+        return 'f'
+
 
 
 def extractContactsFromData(companyWithContacts):
