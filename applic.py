@@ -3,12 +3,20 @@ import os #create dir in sendEmail
 from emailClient import SendMessage
 
 sender="xaver.max.gruber@googlemail.com"
+pathToDataFile=r"Model/Output.yaml"
 
 def main():
+
+    #dummy data creation
     data=createDummyData()
-    #exampleReadDataFromStructure(data)
     writeDataToFile(data)
-    pass
+
+
+    dataFromFile=loadDataFromFile(pathToDataFile)
+    createInternalStructureFromFileData(dataFromFile)
+
+    #highest instance should be a dictionary, with key of company name and value is an object with complete company data
+    
 
 # """
 #     dataFromFile=loadDataFromFile()
@@ -109,14 +117,25 @@ def writeDataToFile(company_list):
         yaml.dump(company_list, file)
 
 
-def loadDataFromFile():
+def loadDataFromFile(file_path):
+    if not os.path.isfile(file_path):
+        raise FileNotFoundError('cannot open data file')
+    with open(file_path, mode="r") as file:
+        try:
+            return yaml.load(file, Loader=yaml.FullLoader)
+
+        except yaml.YAMLError as e:
+            print(e)
+            raise
+    
+"""
     with open("Model/Output.yaml", mode="r") as file:
         dataFromYaml = yaml.load(file, Loader=yaml.FullLoader)
 
     companyWithContacts= dataFromYaml
-    return companyWithContacts
+    return companyWithContacts"""
 
-def createInternalStructureFromFileData():
+def createInternalStructureFromFileData(data):
     pass
 
 
