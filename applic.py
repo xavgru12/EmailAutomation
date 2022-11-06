@@ -17,6 +17,10 @@ def main():
     all_companies_data_dictionary=createInternalStructureFromFileData(dataFromFile)
     print(all_companies_data_dictionary)
 
+    #in order to send emails, need objects of CompanyData and Model/ text files for email content.
+    #write class called EmailContent and give it object of CompanyData(all_companies_data_dictionary) and text files
+    #functions methods to create new temp txt file with salutation and name company in text etc..
+
 
 # """
 #     dataFromFile=loadDataFromFile()
@@ -166,6 +170,15 @@ def collectData(company):
 
     #create ContactDetails objects and structure them via function dictionary
     for contact in contact_list:
+        contact_object = constructContactDetailsObject(contact)
+        contact_dictionary[contact_object.function].append(contact_object)
+
+    #create CompanyData object
+    company_data_object=CompanyData(company_name, contact_dictionary)
+
+    return company_data_object, company_name
+
+def constructContactDetailsObject(contact):
         full_name=contact['contactFullName']
         nick_name=contact['contactNickName']
         email=contact['email']
@@ -174,14 +187,7 @@ def collectData(company):
         language=contact['language']
         formality=contact['formality']
 
-        contact_object=ContactDetails(full_name, nick_name, email, sex, function, language, formality)
-
-        contact_dictionary[function].append(contact_object)
-
-    #create CompanyData object
-    company_data_object=CompanyData(company_name, contact_dictionary)
-
-    return company_data_object, company_name
+        return ContactDetails(full_name, nick_name, email, sex, function, language, formality)
 
 def getContactFunction(functionFromDataFile):
 
