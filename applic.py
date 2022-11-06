@@ -5,6 +5,7 @@ from CompanyData import ContactDetails, CompanyData
 
 sender="xaver.max.gruber@googlemail.com"
 pathToDataFile=r"Model/Output.yaml"
+emailContentFile = r"Model/CatchUp/TextMale.txt"
 
 def main():
 
