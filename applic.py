@@ -2,6 +2,8 @@ import yaml
 import os #create dir in sendEmail
 from emailClient import SendMessage
 from CompanyData import ContactDetails, CompanyData
+from EmailConfig import EmailConfig
+from EmailHandler import EmailHandler
 
 sender="xaver.max.gruber@googlemail.com"
 pathToDataFile=r"Model/Output.yaml"
@@ -16,7 +18,16 @@ def main():
 
     dataFromFile=loadDataFromFile(pathToDataFile) #write function to verify data file by checking if all fields eg contacts, email, company name exist
     all_companies_data_dictionary=createInternalStructureFromFileData(dataFromFile)
+    print("complete internal structure:")
+    print()
+    print()
     print(all_companies_data_dictionary)
+
+    config = EmailConfig(['zhuelke'], ['hr'], r"Model/CatchUp/TextMale.txt", "Hallo", "Was ist der Stand?")
+    handler = EmailHandler(all_companies_data_dictionary, config)
+    companyNameWithFilteredContactsObjectsList=handler.getFilteredContactDetailsObjects()
+    #print(companyNameWithFilteredContactsObjectsList)
+    handler.iterateThroughCompaniesToCreateEmailDataObjects(companyNameWithFilteredContactsObjectsList)
 
     #in order to send emails, need objects of CompanyData and Model/ text files for email content.
     #write class called EmailContent and give it object of CompanyData(all_companies_data_dictionary) and text files
@@ -277,9 +288,9 @@ def takeDataToSendEmail(contact_dict, folder_name):
     sex=contact_dict['sex']
     print("email will be sent to: "+email_address)
     if email_address is not None and name is not None:
-        if sex is "f":
+        if sex == "f":
             sendFemaleEmail(base_path, email_address)
-        elif sex is "m":
+        elif sex == "m":
             sendMaleEmail(base_path, email_address)
         else:
             raise("unknown sex type")

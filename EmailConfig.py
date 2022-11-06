@@ -9,6 +9,8 @@ class EmailConfig:
     companiesToSend: list
     functionsToSend: list
     emailContentFilepath: str
+    greeting: str
+    subject: str
 
 
 
