@@ -67,6 +67,30 @@ class EmailHandler: #emailHandler is supposed to create EmailData objects
         print("email content text:")
         print(message)
 
+        #need a Parser that parses complete content and save it, give it to object emailConfig or create new one 
+        #parser like this: Content.txt: #German in one line as marker and then content, for every language
+        #greeting.txt #Formal and #Informal etc, get (r) correct sehr geehrte(r) for Male and Female
+
+
+"""
+        def each_chunk(stream, separator):
+
+  buffer = ''
+  while True:  # until EOF
+    chunk = stream.read(CHUNK_SIZE)  # I propose 4096 or so
+    if not chunk:  # EOF?
+      yield buffer
+      break
+    buffer += chunk
+    while True:  # until no separator is found
+      try:
+        part, buffer = buffer.split(separator, 1)
+      except ValueError:
+        break
+      else:
+        yield part
+"""
+
 
     
 
