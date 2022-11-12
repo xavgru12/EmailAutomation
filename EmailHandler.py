@@ -1,20 +1,27 @@
 from dataclasses import dataclass
 from EmailConfig import EmailConfig
+from FileReader import FileReader
+from ModelData import ModelData
+from EmailData import EmailData
 
 def main():
-    config = EmailConfig(['zhuelke'], ['hr'], r"Model/CatchUp/TextMale.txt", "Hallo", "Was ist der Stand?")
-    handler = EmailHandler(dict(), config)
-    #print(handler.emailConfig)
+    config = EmailConfig(['zhuelke'], ['hr'], "CatchUp")
+    fileReader = FileReader(config.context)
+    modelDataObject = fileReader.createModelDataObject()
+    print(modelDataObject)
+
+
+
+    handler = EmailHandler(dict(), config, modelDataObject )
     companyNameWithFilteredContactsObjectsList=handler.getFilteredContactDetailsObjects()
     handler.iterateThroughCompaniesToCreateEmailDataObjects(companyNameWithFilteredContactsObjectsList)
 
-#create text files for greeting, subject and textcontent
-#in greeting.txt, versions of German, English, same for other .txts
 
 @dataclass
 class EmailHandler: #emailHandler is supposed to create EmailData objects
     data_dictionary: dict
     emailConfig: EmailConfig
+    modelData: ModelData
 
     def getFilteredContactDetailsObjects(self):
         #company_list = []
@@ -39,63 +46,61 @@ class EmailHandler: #emailHandler is supposed to create EmailData objects
         return [company_name, contactsToSend]
 
     def iterateThroughCompaniesToCreateEmailDataObjects(self, company_list): #useDataToWriteText(self, company_list):
+        email_data_list=[]
         for company_data in company_list:
-            self.createEmailDataObjects(company_data)
-        
+            email_details_objects=self.createEmailDataObjects(company_data)
+            email_data_list.extend(email_details_objects)
+
+        return email_data_list
+
+
     def createEmailDataObjects(self, company):
 
         company_name = company[0]
         contact_objects = company[1]
+
+        email_data_list=[]
+
         for contact in contact_objects:
-            self.createTextFromTemplate(company_name, contact)
-            #create subject
-            #get receiver of email
-            #create emailData object, maybe save objects in list of emailHandler class
-        
+            text = self.createTextFromTemplate(company_name, contact)
+            subject = self.createSubjectFromTemplate(contact)
+            receiver = contact.email
+            email_data = EmailData(receiver, subject, text)
+            email_data_list.append(email_data)
+
+        return email_data_list
+
 
     def createTextFromTemplate(self, company_name, contact):
-        with open(self.emailConfig.emailContentFilepath, "r") as file:
-            fileDummyData=file.read() #create function to choose English or German
-        #print(fileDummyData)
-        greeting=self.emailConfig.greeting #create function getGreeting to choose from language and as well formality
-        subject = self.emailConfig.subject #create function to choose English or German
-        message = f"{greeting} {contact.nick_name}"
-        message=message+fileDummyData
-        print()
-        print()
-        print()
-        print("email content text:")
-        print(message)
+        #company_name not used for now, could use it in future
 
-        #need a Parser that parses complete content and save it, give it to object emailConfig or create new one 
-        #parser like this: Content.txt: #German in one line as marker and then content, for every language
-        #greeting.txt #Formal and #Informal etc, get (r) correct sehr geehrte(r) for Male and Female
+        language=contact.language #format is first letter is capital, eg English
+        if contact.sex == 'm':
+            sex = "Male"
+        elif contact.sex == "f":
+            sex = "Female"
 
+       #modelData for greeting: dict expects key formatted like this: GermanMale
+       
 
-"""
-        def each_chunk(stream, separator):
+       #get correct greeting (language and sex)
+        if contact.formality is True:
+            greeting=self.modelData.greetingFormal[language+sex]
+        elif contact.formality is False:
+            greeting=self.modelData.greetingInformal[language+sex]
 
-  buffer = ''
-  while True:  # until EOF
-    chunk = stream.read(CHUNK_SIZE)  # I propose 4096 or so
-    if not chunk:  # EOF?
-      yield buffer
-      break
-    buffer += chunk
-    while True:  # until no separator is found
-      try:
-        part, buffer = buffer.split(separator, 1)
-      except ValueError:
-        break
-      else:
-        yield part
-"""
+        #modelData for content: dict expects language, eg English
+        content= self.modelData.content[language]
 
+        text=f"{greeting} {contact.nick_name},\n{content}"
 
-    
+        return text
 
-
-
+    def createSubjectFromTemplate(self, contact):
+        language= contact.language                 #formatted like English
+        subject = self.modelData.subject[language] #modeldata dict expects format: English
+        
+        return subject
 
 
 if __name__ == '__main__':

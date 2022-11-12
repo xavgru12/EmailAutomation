@@ -4,9 +4,7 @@ from ModelData import ModelData
 
 def main():
     fileReader = FileReader("CatchUp")
-    print(fileReader.context)
-    #data=fileReader.getFormalGreeting("./Model/General/GreetingFormal.txt")
-    #print(data)
+    #print(fileReader.context)
     fileReader.createModelDataObject()
 
 
@@ -22,11 +20,6 @@ class FileReader:
         subjectDict = self.getSubject("./Model/"+self.context+"/Subject.txt")
 
         modelData = ModelData(contentDict, subjectDict, formalGreetingDict,  informalGreetingDict)
-
-        print(formalGreetingDict)
-        print(informalGreetingDict)
-        print(contentDict)
-        print(subjectDict)
 
         return modelData
 
@@ -47,18 +40,18 @@ class FileReader:
         fileAsDict= self.parseFile(filepath)
         return fileAsDict
 
-    def parseFile(self, filepath, bufferstrip="\n"):
+    def parseFile(self, filepath, buffer_strip="\n"):
         content={}
         with open(filepath, mode="r") as file:
             buffer=""
             name=""
 
             for line in file: 
-                markerLine=self.checkIfMarkerLine(line, '#')
+                marker_line=self.checkIfMarkerLine(line, '#')
 
-                if not markerLine:
-                    buffer+=line.rstrip(bufferstrip)    #add line to buffer as it is no markerLine with '#'
-                elif markerLine:
+                if not marker_line:
+                    buffer+=line.rstrip(buffer_strip)    #add line to buffer as it is no markerLine with '#'
+                elif marker_line:
                     if name != "":                      #only add data to dictionary if name is not empty, eg at first markerLine in file
                         content[name]=buffer            # add buffer content to dict
                         buffer=""                       #reset buffer after it is put in content dictionary
@@ -73,7 +66,6 @@ class FileReader:
             return True
         else: 
             return False
-
 
 
 

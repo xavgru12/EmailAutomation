@@ -4,6 +4,7 @@ from emailClient import SendMessage
 from CompanyData import ContactDetails, CompanyData
 from EmailConfig import EmailConfig
 from EmailHandler import EmailHandler
+from FileReader import FileReader
 
 sender="xaver.max.gruber@googlemail.com"
 pathToDataFile=r"Model/Output.yaml"
@@ -15,7 +16,7 @@ def main():
     data=createDummyData()
     writeDataToFile(data)
 
-
+    #Company Data with ContactDetails
     dataFromFile=loadDataFromFile(pathToDataFile) #write function to verify data file by checking if all fields eg contacts, email, company name exist
     all_companies_data_dictionary=createInternalStructureFromFileData(dataFromFile)
     print("complete internal structure:")
@@ -23,29 +24,30 @@ def main():
     print()
     print(all_companies_data_dictionary)
 
-    config = EmailConfig(['zhuelke'], ['hr'], r"Model/CatchUp/TextMale.txt", "Hallo", "Was ist der Stand?")
-    handler = EmailHandler(all_companies_data_dictionary, config)
+    #Model Data for email content
+    config = EmailConfig(['zhuelke', 'swisson'], ['hr'], "CatchUp")
+    fileReader = FileReader(config.context)
+    modelDataObject = fileReader.createModelDataObject()
+
+    #prepare content for email, as in handle email
+    handler = EmailHandler(all_companies_data_dictionary, config, modelDataObject)
     companyNameWithFilteredContactsObjectsList=handler.getFilteredContactDetailsObjects()
-    #print(companyNameWithFilteredContactsObjectsList)
-    handler.iterateThroughCompaniesToCreateEmailDataObjects(companyNameWithFilteredContactsObjectsList)
+    email_data_list = handler.iterateThroughCompaniesToCreateEmailDataObjects(companyNameWithFilteredContactsObjectsList)
 
-    #in order to send emails, need objects of CompanyData and Model/ text files for email content.
-    #write class called EmailContent and give it object of CompanyData(all_companies_data_dictionary) and text files
-    #functions methods to create new temp txt file with salutation and name company in text etc..
+    #TODO: before sending emails, create a temporary log file where the complete content of all the emails 
+    # being sent are listed up with to, subject and content, user can check if its correct and
+    # with (y/n) send all emails or abort
+    #TODO: create command line tool where you can select whom to send, and put all the info into EmailConfig object
+    #ready to send emails
 
+    sendMessages(email_data_list)
 
-# """
-#     dataFromFile=loadDataFromFile()
-#     contacts=extractContactsFromData(dataFromFile)
-#     iterateOverContactsToSendEmail(contacts)
-#     #contacts=readDataFromFile(data)
-#     #sendEmail(contacts)"""
 
 def createDummyData():
 
     contactDetails = {
         'contactFullName': 'TestKontaktMaennlich1',
-        'contactNickName' : "Herr NachnameMaennlich",
+        'contactNickName' : "NachnameMaennlich formality True sex M, English HR",
         'email': 'xaver.max.gruber+test1@gmail.com',
         'sex': 'm',
         'function' : 'HR',
@@ -104,28 +106,6 @@ def createDummyData():
     company_list = [companyData, companyData2]
     return company_list
 
-
-def readDataFromFile(company_list):
-    
-    dirnameToCreate= "Model"
-    if not os.path.exists(dirnameToCreate):
-        os.makedirs(dirnameToCreate)
-    with open("Model/Output.yaml", mode="wt", encoding="utf-8") as file:
-        yaml.dump(company_list, file)
-
-
-    with open("Model/Output.yaml", mode="r") as file:
-        dataFromYaml = yaml.load(file, Loader=yaml.FullLoader)
-
-    companyWithContacts= dataFromYaml
-    return companyWithContacts
-
-def contactInfoOutput(company, contact_dict):
-    email_address= contact_dict['email'] 
-    print("email: "+ email_address)
-    sex= contact_dict['sex']
-    name=contact_dict['contactname']
-
 def writeDataToFile(company_list):
     dirnameToCreate= "Model"
     if not os.path.exists(dirnameToCreate):
@@ -145,19 +125,12 @@ def loadDataFromFile(file_path):
             print(e)
             raise
     
-"""
-    with open("Model/Output.yaml", mode="r") as file:
-        dataFromYaml = yaml.load(file, Loader=yaml.FullLoader)
-
-    companyWithContacts= dataFromYaml
-    return companyWithContacts"""
 
 def createInternalStructureFromFileData(company_list):
 
     company_dictionary={}
     for company in company_list:
         company_data_as_object, company_name= collectData(company)
-        #print(company_data_as_object)
         
         if company_name not in company_dictionary:
             company_dictionary[company_name]= company_data_as_object
@@ -166,6 +139,8 @@ def createInternalStructureFromFileData(company_list):
             raise Exception("Same company was found twice in data file. Remove the double from file.")
     
     return company_dictionary
+
+
 
 def collectData(company):
     
@@ -201,6 +176,8 @@ def constructContactDetailsObject(contact):
 
         return ContactDetails(full_name, nick_name, email, sex, function, language, formality)
 
+
+
 def getContactFunction(functionFromDataFile):
 
     if functionFromDataFile == 'HR':
@@ -218,84 +195,15 @@ def getContactSex(sexFromDataFile):
         return 'f'
 
 
-
-def extractContactsFromData(companyWithContacts):
-    contact_list=[]
-    for contactsByCompany in companyWithContacts:
-        print("company name: ")
-        companyName= contactsByCompany['CompanyName']
-        print(companyName)
-        
-        contacts= contactsByCompany['Contacts']
-        contact_list.extend(contacts)
-    
-    return contact_list
-
-def iterateOverContactsToSendEmail(contacts):
-    for contact in contacts:
-        takeDataToSendEmail(contact, "CatchUp")
-
-def exampleReadDataFromStructure(companyWithContacts):
-    for contactsByCompany in companyWithContacts:
-        print("company name: ")
-        companyName= contactsByCompany['CompanyName']
-        print(companyName)
-        print("all contacts:")
-        
-        contacts= contactsByCompany['contactInfo']
-        print(contacts)
-        for contact in contacts:
-            contactInfoOutput(companyName, contact)
-        print("complete company info: ")
-        print(contactsByCompany)
-        print()
-        print()
-        print()
-
-def sendMaleEmail(base_path,email):
-
-        
-        with open(base_path+"/TextMale.txt","r") as file:
-            text=file.read()
-                
-        with open(base_path+"/SubjectMale.txt","r") as file:
-            subject=file.read()
-
-        if text is not None and subject is not None:
-            SendMessage(sender, email, subject, "", text)
-            
-
-def sendFemaleEmail(base_path, email):
-        with open(base_path+"/TextFemale.txt","r") as file:
-            text=file.read()
-
-        with open(base_path+"/SubjectFemale.txt","r") as file:
-            subject=file.read()
-
-        if text is not None and subject is not None:
-            SendMessage(sender, email, subject, "", text)
-            #SendMessage(sender, to, subject, msgHtml, msgPlain)
-    
+def sendMessages(data_list):
+    for email_data in data_list:
+        to=email_data.to
+        subject = email_data.subject
+        content = email_data.content
+        SendMessage(sender, to, subject, "", content)
 
 
-def takeDataToSendEmail(contact_dict, folder_name):
-    base_path="./Model/"+folder_name
-    if not os.path.exists(base_path):
-        raise("Folder could not be found")
 
-    email_address= contact_dict['email']
-    name= contact_dict['contactname']
-    sex=contact_dict['sex']
-    print("email will be sent to: "+email_address)
-    if email_address is not None and name is not None:
-        if sex == "f":
-            sendFemaleEmail(base_path, email_address)
-        elif sex == "m":
-            sendMaleEmail(base_path, email_address)
-        else:
-            raise("unknown sex type")
-    else:
-        raise("missing data")
 
 if __name__ == '__main__':
     main()
