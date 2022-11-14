@@ -45,7 +45,7 @@ class EmailHandler: #emailHandler is supposed to create EmailData objects
 
         return [company_name, contactsToSend]
 
-    def iterateThroughCompaniesToCreateEmailDataObjects(self, company_list): #useDataToWriteText(self, company_list):
+    def iterateThroughCompaniesToCreateEmailDataObjects(self, company_list): 
         email_data_list=[]
         for company_data in company_list:
             email_details_objects=self.createEmailDataObjects(company_data)
