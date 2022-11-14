@@ -1,16 +1,39 @@
 import yaml
-import os #create dir in sendEmail
+import os 
 from emailClient import SendMessage
 from CompanyData import ContactDetails, CompanyData
 from EmailConfig import EmailConfig
 from EmailHandler import EmailHandler
 from FileReader import FileReader
+import argparse
 
 sender="xaver.max.gruber@googlemail.com"
 pathToDataFile=r"Model/Output.yaml"
 emailContentFile = r"Model/CatchUp/TextMale.txt"
 
+def parseArguments():
+    parser = argparse.ArgumentParser(description='Send emails automatically. Needed data structure: \n Model/<your_foldername>/Context.txt,\n  Model/<your_foldername>/Subject.txt, \nModel/General with GreetingFormal.txt, \nGreetingInformal.txt')
+    parser.add_argument('--context','-ctxt', help='what the email is about, choose a name and put it as folder name under /Model/', required=True) 
+    parser.add_argument('--function', '-f',
+                    default='hr',
+                    nargs='?',
+                    choices=['hr', 'teamLead', 'technical', 'all'],  #make it possible to accept multiple choices, choices probably only accepts one value
+                    help='function of the contact within the company. Default is: %(default)s)')
+    parser.add_argument('--company', '-comp', default='all', help='select companies to send email to. Default is: %(default)s)') #make it possible to accept multiple choices
+    args = parser.parse_args()
+    print(f"function: {args.function}")
+    print(f"company: {args.company}")
+    print(f"context: {args.context}")
+
+    #try action='append' in add_argument to have multiple choices
+    #put collected args in EmailConfig object, if companies all was selected, add every key from dictionary in list for emailConfig object, done!
+
+ 
+
 def main():
+
+    parseArguments()
+    return
 
     #dummy data creation
     data=createDummyData()
