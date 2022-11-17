@@ -1,0 +1,32 @@
+- CompanyName: zuehlke
+  Contacts:
+  - contactFullName: TestKontaktMaennlich1
+    contactNickName: NachnameMaennlich formality True sex M, English HR
+    email: xaver.max.gruber+test1@gmail.com
+    formality: true
+    function: HR
+    language: English
+    sex: m
+  - contactFullName: TestKontaktMaennlich2
+    contactNickName: Vorname NachnameMaennlich
+    email: xaver.max.gruber+test2@gmail.com
+    formality: false
+    function: TeamLead
+    language: English
+    sex: m
+- CompanyName: Swisson
+  Contacts:
+  - contactFullName: TestKontaktWeiblich3
+    contactNickName: Vorname NachnameWeiblich
+    email: xaver.max.gruber+test3@gmail.com
+    formality: false
+    function: HR
+    language: German
+    sex: f
+  - contactFullName: TestKontaktWeiblich4
+    contactNickName: Frau NachnameWeiblich
+    email: xaver.max.gruber+test4@gmail.com
+    formality: true
+    function: Technical
+    language: German
+    sex: f

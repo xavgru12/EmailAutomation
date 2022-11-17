@@ -8,9 +8,8 @@ from FileReader import FileReader
 import argparse
 
 sender="xaver.max.gruber@googlemail.com"
-pathToDataFile=r"Model/Output.yaml"
-databaseFile=r"./Model/Database.yaml"
-emailContentFile = r"Model/CatchUp/TextMale.txt"
+pathToDataFile=r"Model/Output.yaml"           #used in dummy creation writeDataToFile (for debugging)
+databaseFile=r"./Model/CompanyDatabase.yaml"
 
 def parseArguments():
     parser = argparse.ArgumentParser(description='Send emails automatically. Needed data structure: \n Model/<your_foldername>/Context.txt,\n  Model/<your_foldername>/Subject.txt, \nModel/General with GreetingFormal.txt, \nGreetingInformal.txt')
@@ -21,7 +20,7 @@ def parseArguments():
                     choices=['hr', 'team_lead', 'technical'], 
                     help='function of the contact within the company. Default is: %(default)s)') #argument can only be of item in choice list
     group = parser.add_mutually_exclusive_group(required=True) #need to either give argument --company or --companyTextList
-    group.add_argument('--company', '-comp', action='append', help='select companies to send email to. Write all to send to all companies') 
+    group.add_argument('--company', '-comp', action='extend', nargs='+', help=f'select companies to send email to. Write all to send to all companies') 
     group.add_argument('--companyTextList', '-compTxt', help='this function is currently not available') 
     
     args = parser.parse_args()
@@ -54,7 +53,8 @@ def getCompanyList(args, company_dict):
         complete_company_list=list(company_dict.keys())
         return complete_company_list
         #get all companies
-    return args.company
+    return [company.casefold() for company in args.company] #put companies as lower case in list
+   
     
 
 
@@ -67,12 +67,8 @@ def main():
     #Company Data with ContactDetails from file Model/Database.yaml
     dataFromFile=loadDataFromFile(databaseFile) #write function to verify data file by checking if all fields eg contacts, email, company name exist
     all_companies_data_dictionary=createInternalStructureFromFileData(dataFromFile)
-    print("complete internal structure:")
-    print()
-    print()
-    print(all_companies_data_dictionary)
 
-
+    #parse arguments
     given_arguments=parseArguments()
     context=getContext(given_arguments.context)
     function_list= getFunctionList(given_arguments.function)
