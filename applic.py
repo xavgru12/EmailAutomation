@@ -1,31 +1,84 @@
 import yaml
-import os #create dir in sendEmail
+import os 
 from emailClient import SendMessage
 from CompanyData import ContactDetails, CompanyData
 from EmailConfig import EmailConfig
 from EmailHandler import EmailHandler
 from FileReader import FileReader
+import argparse
 
 sender="xaver.max.gruber@googlemail.com"
-pathToDataFile=r"Model/Output.yaml"
-emailContentFile = r"Model/CatchUp/TextMale.txt"
+pathToDataFile=r"Model/Output.yaml"           #used in dummy creation writeDataToFile (for debugging)
+databaseFile=r"./Model/CompanyDatabase.yaml"
+
+def parseArguments():
+    parser = argparse.ArgumentParser(description='Send emails automatically. Needed data structure: \n Model/<your_foldername>/Context.txt,\n  Model/<your_foldername>/Subject.txt, \nModel/General with GreetingFormal.txt, \nGreetingInformal.txt')
+    parser.add_argument('--context','-ctxt', help='what the email is about, choose a name and put it as folder name under /Model/', required=True) 
+    parser.add_argument('--function', '-f',
+                    default=['all'],
+                    nargs='*',
+                    choices=['hr', 'team_lead', 'technical'], 
+                    help='function of the contact within the company. Default is: %(default)s)') #argument can only be of item in choice list
+    group = parser.add_mutually_exclusive_group(required=True) #need to either give argument --company or --companyTextList
+    group.add_argument('--company', '-comp', action='extend', nargs='+', help=f'select companies to send email to. Write all to send to all companies') 
+    group.add_argument('--companyTextList', '-compTxt', help='this function is currently not available') 
+    
+    args = parser.parse_args()
+
+    return args
+"""
+    print(f"function: {args.function}")
+    print(f"context: {args.context}")
+    print(f"Company: {args.company}")
+    print(f"CompanyTextList: {args.companyTextList}") """
+
+ 
+def getContext(contextFromArgs):
+    path_to_context_folder=f"./Model/{contextFromArgs}"
+    if os.path.exists(path_to_context_folder) is True: #os.path.exists(os.path.join(os.getcwd(), fragment))
+        return contextFromArgs
+    else:
+        raise Exception("context folder does not exist in ./Model/")
+
+def getFunctionList(functionFromArgsList):
+    if functionFromArgsList[0] == "all":
+        return ['hr', 'team_lead', 'technical']
+    else:
+        return functionFromArgsList
+
+def getCompanyList(args, company_dict):
+    if args.companyTextList:
+        raise("currently not possible to take a text file with companies to send emails to")
+    if args.company is not None and "all" in args.company:
+        complete_company_list=list(company_dict.keys())
+        return complete_company_list
+        #get all companies
+    return [company.casefold() for company in args.company] #put companies as lower case in list
+   
+    
+
 
 def main():
 
     #dummy data creation
     data=createDummyData()
-    writeDataToFile(data)
+    writeDataToFile(data) #for testing: Model/Output.yaml
 
-    #Company Data with ContactDetails
-    dataFromFile=loadDataFromFile(pathToDataFile) #write function to verify data file by checking if all fields eg contacts, email, company name exist
+    #Company Data with ContactDetails from file Model/Database.yaml
+    dataFromFile=loadDataFromFile(databaseFile) #write function to verify data file by checking if all fields eg contacts, email, company name exist
     all_companies_data_dictionary=createInternalStructureFromFileData(dataFromFile)
-    print("complete internal structure:")
-    print()
-    print()
-    print(all_companies_data_dictionary)
+
+    #parse arguments
+    given_arguments=parseArguments()
+    context=getContext(given_arguments.context)
+    function_list= getFunctionList(given_arguments.function)
+    company_list= getCompanyList(given_arguments, all_companies_data_dictionary)
+
+    #put arguments in config object
+    config = EmailConfig(company_list, function_list, context)
+    print(config)
 
     #Model Data for email content
-    config = EmailConfig(['zhuelke', 'swisson'], ['hr'], "CatchUp")
     fileReader = FileReader(config.context)
     modelDataObject = fileReader.createModelDataObject()
 
@@ -37,8 +90,6 @@ def main():
     #TODO: before sending emails, create a temporary log file where the complete content of all the emails 
     # being sent are listed up with to, subject and content, user can check if its correct and
     # with (y/n) send all emails or abort
-    #TODO: create command line tool where you can select whom to send, and put all the info into EmailConfig object
-    #ready to send emails
 
     sendMessages(email_data_list)
 
@@ -90,7 +141,7 @@ def createDummyData():
 
     }
     #lastEdited would be useful when data is in a a database, for now it is a local file
-    company_name1="zhuelke"
+    company_name1="zuehlke"
     company_name2="Swisson"
     contactList = [contactDetails, contactDetails2]
     contactList2 = [contactDetails3, contactDetails4]
