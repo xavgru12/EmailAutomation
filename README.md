@@ -18,3 +18,19 @@ type in email where you want to send emails froms
 
 install needed packages with:
 pip install -r requirements.txt
+
+Using EmailAutomation:
+#1 in applic.py: write your email address down
+#2 in Model/General are the files for the greeting text: GreetingFormal.txt and GreetingInformal.txt
+#3 in Model/ create a folder and as subfolder add Content.txt and Subject.txt, folder name will be your context argument
+#4 in CompanyDatabase.yaml: use the format to write your data in
+
+In the text files you can define the language eg #English and #German.
+In CompanyDatabase.yaml there is company name with contact details: contactFullName contactNickName email
+formality, function(hr etc), language, sex. All the fields need to be defined for every contact.
+
+run script using
+python applic.py --company <company_name> --context <your_folder_name>
+
+optional argument:
+function: either hr, technical or team_lead (position in company)
