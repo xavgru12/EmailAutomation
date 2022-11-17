@@ -1,7 +1,7 @@
 - CompanyName: zuehlke
   Contacts:
   - contactFullName: TestKontaktMaennlich1
-    contactNickName: NachnameMaennlich formality True sex M, English HR
+    contactNickName: NachnameMaennlich 
     email: xaver.max.gruber+test1@gmail.com
     formality: true
     function: HR
