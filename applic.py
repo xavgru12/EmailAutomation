@@ -6,6 +6,7 @@ from EmailConfig import EmailConfig
 from EmailHandler import EmailHandler
 from FileReader import FileReader
 import argparse
+import sys
 
 sender="xaver.max.gruber@googlemail.com"
 pathToDataFile=r"Model/Output.yaml"           #used in dummy creation writeDataToFile (for debugging)
@@ -87,9 +88,10 @@ def main():
     companyNameWithFilteredContactsObjectsList=handler.getFilteredContactDetailsObjects()
     email_data_list = handler.iterateThroughCompaniesToCreateEmailDataObjects(companyNameWithFilteredContactsObjectsList)
 
-    #TODO: before sending emails, create a temporary log file where the complete content of all the emails 
-    # being sent are listed up with to, subject and content, user can check if its correct and
-    # with (y/n) send all emails or abort
+    permission_to_send=confirm_sending_messages(email_data_list)
+    if permission_to_send is False:
+        raise Exception("Sending aborted by user.")
+      
 
     sendMessages(email_data_list)
 
@@ -245,6 +247,35 @@ def getContactSex(sexFromDataFile):
     elif sexFromDataFile == 'f':
         return 'f'
 
+def confirm_sending_messages(data_list):
+    tempfile="./temporaryEmailDatalog.txt"
+    with open(tempfile, "w") as file:
+        for email_data in data_list:
+            file.write(f"Email entry:\nReceiver: {email_data.to}\n")
+            file.write(f"Subject: {email_data.subject}\n")
+            file.write(f"Content:\n\n{email_data.content}")
+            file.write(f"\n-------------------------------------------------------------------------\n\n\n")
+        
+    question=f"Please have a look at {tempfile} and check if that is the content you really wish to send. Answer with"
+    answer= query_yes_no(question)
+    os.remove(tempfile)
+    return answer
+        
+
+
+
+def query_yes_no(question):
+
+    valid = {"yes": True, "y": True, "sure": True, "yeah": True, "no": False, "n": False}
+    prompt = " [y/n] "
+
+    while True:
+        sys.stdout.write(question + prompt)
+        choice = input().lower()
+        if choice in valid:
+            return valid[choice]
+        else:
+            sys.stdout.write("Please respond with 'yes' or 'no' " "(or 'y' or 'n').\n")
 
 def sendMessages(data_list):
     for email_data in data_list:
