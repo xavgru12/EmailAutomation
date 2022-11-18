@@ -30,6 +30,7 @@ In CompanyDatabase.yaml there is company name with contact details: contactFullN
 
 run script using<br>
 python applic.py --company <company_name> --context <your_folder_name><br>
+if you wish to send emails to everyone, do --company all
 
 optional argument:<br>
 function: either hr, technical or team_lead (position in company)<br>
