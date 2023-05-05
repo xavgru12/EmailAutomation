@@ -12,9 +12,9 @@ Click Application type > Desktop app. <br>
 In the Name field, type a name for the credential. This name is only shown in the Google Cloud console. <br>
 Click Create. The OAuth client created screen appears, showing your new Client ID and Client secret.<br>
 Click OK. The newly created credential appears under OAuth 2.0 Client IDs.<br>
-Download the json file and save it as clien_secret.json in current working directory.<br>
+Download the json file and save it as client_secret.json in current working directory.<br>
 In "OAuthZustimmungsbildschirm" (oauth authorization window) click on Api and services to add a user:<br>
-type in email where you want to send emails froms<br>
+type in email where you want to send emails from<br>
 
 install needed packages with:<br>
 pip install -r requirements.txt<br>
@@ -29,7 +29,7 @@ In the text files you can define the language eg #English and #German.<br>
 In CompanyDatabase.yaml there is company name with contact details: contactFullName, contactNickName, email, formality, function(hr etc), language, sex. All the fields need to be defined for every contact.<br>
 
 run script using<br>
-python applic.py --company <company_name> --context <your_folder_name><br>
+python3 applic.py --company <company_name> --context <your_folder_name><br>
 if you wish to send emails to everyone, do --company all
 
 optional argument:<br>
