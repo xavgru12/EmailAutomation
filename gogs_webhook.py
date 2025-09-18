@@ -43,12 +43,12 @@ def get_org_emails2(gogs_url: str, org: str, token: str) -> list[str]:
     # print(members)
 
     # working
-    # headers = {"Authorization": f"token {token}"}
-    # url = f"{gogs_url}/repos/ECON/ag-econ-w/collaborators"
-    # response = requests.get(url, headers=headers)
-    # response.raise_for_status()
-    # collaborators = response.json()
-    # print(collaborators)
+    headers = {"Authorization": f"token {token}"}
+    url = f"{gogs_url}/repos/ECON/ag-econ-w/collaborators"
+    response = requests.get(url, headers=headers)
+    response.raise_for_status()
+    collaborators = response.json()
+    print(collaborators)
 
     headers = {"Authorization": f"token {token}"}
     url = f"{gogs_url}/orgs/ECON/teams"
@@ -59,9 +59,10 @@ def get_org_emails2(gogs_url: str, org: str, token: str) -> list[str]:
         if item.get("name") == "Owners":
             team_id = item.get("id")
             print(f"Team ID of 'Owners': {team_id}")
-    
 
-
+    # url = f"{gogs_url}/repos/{org}/members"
+    # data = execute_gogs_api_request(url, headers)
+    # print("Team members:", data)
 
     # print(members)
     # base = gogs_url.rstrip('/')
@@ -112,7 +113,7 @@ def webhook():
     payload = request.json
     event = request.headers.get("X-Gogs-Event")
     
-    emails = get_org_emails()
+    #emails = get_org_emails()
     emails = ["xaver.max.gruber+EmailClient@googlemail.com"]
     subject = f"[Gogs] {event} event in {payload['repository']['full_name']}"
     body = f"Event: {event}\n\nPayload:\n{payload}"
@@ -121,5 +122,5 @@ def webhook():
     return "OK"
 
 if __name__ == "__main__":
-    # app.run(port=5000)
-    print(get_org_emails2(GOGS_API, ORG, TOKEN))
+    app.run(port=5000)
+    #print(get_org_emails2(GOGS_API, ORG, TOKEN))
