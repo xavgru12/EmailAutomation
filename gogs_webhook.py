@@ -6,10 +6,16 @@ from emailClient import SendMessage
 
 app = Flask(__name__)
 
-GOGS_API = "http://10.10.80.134:3000/api/v1"
-ORG = "ECON"
-TOKEN = "a0cda256fb20e91a4d9d925c8eab644ddec08e6b"
-TEAM = "Owners"
+# put in config json file and load here
+def get_config():
+    with open("config.json", "r") as f:
+        return json.load(f)
+# create a json formatted with the following content:
+config = get_config()
+GOGS_API = config.get("GOGS_API", "http://10.10.80.134:3000/api/v1")
+ORG = config.get("ORG", "ECON")
+TOKEN = config.get("TOKEN", "a0cda256fb20e91a4d9d925c8eab644ddec08e6b")
+TEAM = config.get("TEAM", "Owners")
 
 
 def retrieve_gogs_org_emails(base_gogs_api_url: str, org: str, team: str, token: str) -> list[str]:
@@ -90,7 +96,13 @@ def send_messages(sender, email_list, subject, body):
 def webhook():
     payload = request.json
     event = request.headers.get("X-Gogs-Event")
-    sender = "xaver.max.gruber@googlemail.com"
+
+    config = get_config()
+    GOGS_API = config.get("GOGS_API", "http://10.10.80.134:3000/api/v1")
+    ORG = config.get("ORG", "ECON")
+    TOKEN = config.get("TOKEN", "a0cda256fb20e91a4d9d925c8eab644ddec08e6b")
+    TEAM = config.get("TEAM", "Owners")
+    SENDER = config.get("SENDER", "xaver.max.gruber@googlemail.com")
 
     if event == "pull_request":
         emails = retrieve_gogs_org_emails(GOGS_API, ORG, TEAM, TOKEN)
@@ -98,7 +110,7 @@ def webhook():
         action = payload.get("action", "updated")
         repository = payload.get("repository", {}).get("full_name", "unknown repository")
         subject = f"[Gogs] Pull Request {action} in {repository}"
-        send_messages(sender, emails, subject, body)
+        send_messages(SENDER, emails, subject, body)
     return "OK"
 
 if __name__ == "__main__":
