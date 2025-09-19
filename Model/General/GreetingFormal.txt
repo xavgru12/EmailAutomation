@@ -1,8 +1,0 @@
-#GermanFemale
-Sehr geehrte Frau
-#GermanMale
-Sehr geehrter Herr
-#EnglishMale
-Dear Mr.
-#EnglishFemale
-Dear Ms.
