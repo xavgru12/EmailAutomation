@@ -6,7 +6,6 @@ from emailClient import SendMessage
 app = Flask(__name__)
 
 GOGS_API = "http://10.10.80.134:3000/api/v1"
-GOGS_URL = "http://10.10.80.134:3000"
 ORG = "ECON"
 TOKEN = "a0cda256fb20e91a4d9d925c8eab644ddec08e6b"
 TEAM = "Owners"
