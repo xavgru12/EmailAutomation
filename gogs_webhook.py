@@ -13,22 +13,6 @@ TEAM = "Owners"
 
 
 def retrieve_gogs_org_emails(base_gogs_api_url: str, org: str, team: str, token: str) -> list[str]:
-    #working
-    # headers = {"Authorization": f"token {token}"}
-    # members_url = f"{gogs_url}/api/v1/user/orgs"
-    # response = requests.get(members_url, headers=headers)
-    # response.raise_for_status()
-    # members = response.json()
-    # print(members)
-
-    # working
-    # headers = {"Authorization": f"token {token}"}
-    # url = f"{gogs_url}/repos/ECON/ag-econ-w/collaborators"
-    # response = requests.get(url, headers=headers)
-    # response.raise_for_status()
-    # collaborators = response.json()
-    # print(collaborators)
-
     headers = {"Authorization": f"token {token}"}
     url = f"{base_gogs_api_url}/orgs/ECON/teams"
 
