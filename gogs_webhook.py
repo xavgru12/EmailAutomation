@@ -8,32 +8,11 @@ app = Flask(__name__)
 GOGS_API = "http://10.10.80.134:3000/api/v1"
 GOGS_URL = "http://10.10.80.134:3000"
 ORG = "ECON"
-TOKEN = "a0cda256fb20e91a4d9d925c8eab644ddec08e6b"  # needs read access
+TOKEN = "a0cda256fb20e91a4d9d925c8eab644ddec08e6b"
+TEAM = "Owners"
 
-def get_org_emails():
-    headers = {"Content-Type": "application/json", "Authorization": f"token {TOKEN}"}
-    r = requests.get(f"{GOGS_API}/org/{ORG}/repos", headers=headers)
-    if r.status_code == 200 or r.status_code == 201:
-        pass
-    else:
-        #print(f"Error fetching members: {r.status_code} {r.text}")
-        raise Exception("Failed to fetch members")
-    emails = []
-    for m in r.json():
-        user = m["login"]
-        u = requests.get(f"{GOGS_API}/users/{user}", headers=headers).json()
-        if "email" in u and u["email"]:
-            emails.append(u["email"])
-    return emails
 
-def get_org_emails2(gogs_url: str, org: str, token: str) -> list[str]:
-    """
-    Fetch public emails of members of a Gogs organization.
-
-    gogs_url: Base URL of Gogs server, e.g. https://gogs.example.com
-    org: Organization name
-    token: Personal access token
-    """
+def retrieve_gogs_org_emails(base_gogs_api_url: str, org: str, team: str, token: str) -> list[str]:
     #working
     # headers = {"Authorization": f"token {token}"}
     # members_url = f"{gogs_url}/api/v1/user/orgs"
@@ -43,61 +22,39 @@ def get_org_emails2(gogs_url: str, org: str, token: str) -> list[str]:
     # print(members)
 
     # working
-    headers = {"Authorization": f"token {token}"}
-    url = f"{gogs_url}/repos/ECON/ag-econ-w/collaborators"
-    response = requests.get(url, headers=headers)
-    response.raise_for_status()
-    collaborators = response.json()
-    print(collaborators)
+    # headers = {"Authorization": f"token {token}"}
+    # url = f"{gogs_url}/repos/ECON/ag-econ-w/collaborators"
+    # response = requests.get(url, headers=headers)
+    # response.raise_for_status()
+    # collaborators = response.json()
+    # print(collaborators)
 
     headers = {"Authorization": f"token {token}"}
-    url = f"{gogs_url}/orgs/ECON/teams"
+    url = f"{base_gogs_api_url}/orgs/ECON/teams"
 
-    data = execute_gogs_api_request(url, headers)
+
+    team_id = get_team_id(url, org, team, headers)
+    if team_id is None:
+        raise ValueError(f"Team '{team}' not found")
+
+    url = f"{base_gogs_api_url}/admin/teams/{team_id}/members"
+    email_list = get_user_email_list(url, headers)
+    return email_list
+
+
+def get_team_id(gogs_url: str, org: str, team_name: str, headers: str) -> int:
+    data = execute_gogs_api_request(gogs_url, headers)
     print(data)
     for item in data:
-        if item.get("name") == "Owners":
+        if item.get("name") == team_name:
             team_id = item.get("id")
-            print(f"Team ID of 'Owners': {team_id}")
+            print(f"Team ID of '{team_name}': {team_id}")
+            return team_id
 
-    # url = f"{gogs_url}/repos/{org}/members"
-    # data = execute_gogs_api_request(url, headers)
-    # print("Team members:", data)
-
-    # print(members)
-    # base = gogs_url.rstrip('/')
-    # headers = {"Content-Type": "application/json", "Authorization": f"token {token}"}
-    # session = requests.Session()
-    # session.headers.update(headers)
-
-    # emails: set[str] = set()
-    # page = 1
-
-    # while True:
-    #     # List org members
-    #     resp = session.get(f"{base}/api/v1/org/{org}/members")
-    #     if not resp.ok:
-    #         raise RuntimeError(f"Failed to list members: {resp.status_code}")
-
-    #     members = resp.json()
-    #     if not members:
-    #         break  # no more members
-
-    #     for m in members:
-    #         username = m.get("login")
-    #         if not username:
-    #             continue
-
-    #         # Get user details
-    #         uresp = session.get(f"{base}/api/v1/users/{username}")
-    #         if uresp.ok:
-    #             u = uresp.json()
-    #             if u.get("email"):
-    #                 emails.add(u["email"])
-
-    #     page += 1
-
-    # return sorted(emails)
+def get_user_email_list(gogs_url: str, headers: str) -> list[str]:
+    data = execute_gogs_api_request(gogs_url, headers)
+    email_list = [member.get("email") for member in data if member.get("email")]
+    return email_list
 
 def execute_gogs_api_request(url: str, headers: str) -> dict:
     response = requests.get(url, headers=headers)
@@ -112,9 +69,8 @@ def send_messages(sender, email_list, subject, body):
 def webhook():
     payload = request.json
     event = request.headers.get("X-Gogs-Event")
-    
-    #emails = get_org_emails()
-    emails = ["xaver.max.gruber+EmailClient@googlemail.com"]
+
+    emails = retrieve_gogs_org_emails(GOGS_API, ORG, TEAM, TOKEN)
     subject = f"[Gogs] {event} event in {payload['repository']['full_name']}"
     body = f"Event: {event}\n\nPayload:\n{payload}"
     sender = "xaver.max.gruber@googlemail.com"
@@ -123,4 +79,4 @@ def webhook():
 
 if __name__ == "__main__":
     app.run(port=5000)
-    #print(get_org_emails2(GOGS_API, ORG, TOKEN))
+    #print(retrieve_gogs_org_emails(GOGS_API, ORG, TEAM, TOKEN))
