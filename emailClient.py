@@ -5,7 +5,7 @@ from oauth2client import client, tools, file
 import base64
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from apiclient import errors, discovery
+from googleapiclient import errors, discovery
 import mimetypes
 from email.mime.image import MIMEImage
 from email.mime.audio import MIMEAudio

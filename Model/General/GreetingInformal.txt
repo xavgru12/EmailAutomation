@@ -1,8 +1,0 @@
-#GermanMale
-Hallo 
-#GermanFemale
-Hallo 
-#EnglishFemale
-Hello
-#EnglishMale
-Hello
